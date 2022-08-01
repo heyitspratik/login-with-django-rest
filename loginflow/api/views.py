@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import User, OTPModel, MultipleEmail
-from .serializers import UserSerializer, MobileLoginOTPGenSerializer, MobileLogInSerializer
+from .serializers import UserSerializer, MobileLoginOTPGenSerializer, MobileLogInSerializer, MultipleEmailSerializer
 from rest_framework import viewsets
 from rest_framework.response import Response
 import random
@@ -155,4 +155,33 @@ class MobileLogInViewSet(viewsets.ModelViewSet):
             return Response({"status": 0, "message": " otp -" + serializer.errors['otp'][0]})
         return Response(serializer.errors)
 
+
+
+class PrimaryEmailViewSet(viewsets.ModelViewSet):
+    queryset = MultipleEmail.objects.all()
+    serializer_class = MultipleEmailSerializer
+    http_method_names = ['post']
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = request.data['user']     # need to pass user id here
+            email = request.data['new_email']
+            email_obj = MultipleEmail.objects.filter(user__id=user)
+            for obj in email_obj:
+                obj.is_primary = False
+                obj.save()
+            try:
+                user_obj = User.objects.get(id=user)
+            except:
+                return Response({"status": 0, "message": "Plese provide valid user id."})
+            new_email_obj = MultipleEmail.objects.create(user=user_obj,email=email,is_primary=True)
+            data = {"username":new_email_obj.user.username,"email":email,"mobile_number":new_email_obj.user.mobile_number,"is_primary":new_email_obj.is_primary}
+            return Response({"status": 1, "message": "Primary email updated successfully", "data": data})
+
+        if "user" in serializer.errors:
+            return Response({"status": 0, "message": "user - " + serializer.errors['user'][0]})
+        if "email" in serializer.errors:
+            return Response({"status": 0, "message": "email - " + serializer.errors['email'][0]})
+        return Response(serializer.errors)
 

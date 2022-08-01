@@ -21,3 +21,9 @@ class MobileLogInSerializer(serializers.ModelSerializer):
     class Meta:
         model = OTPModel
         fields = ("mobile_number", "otp")
+
+
+class MultipleEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MultipleEmail
+        fields = ("user","email","is_primary")
