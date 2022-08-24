@@ -9,12 +9,6 @@ python3 -m venv venv
 ## required installations
 install all the python packages mentioned in requirements.txt file
 
-## create django project and make an app inside it
-```
-django-admin startproject projectname
-python manage.py startapp appname
-```
-
 ## Database Setup
 1. install mysql server using below command:
 ```
